@@ -5,59 +5,73 @@ import Layout from '../layouts/Layout.astro';
 <Layout title="Flight Pursuit Trainer">
     <link slot="head" rel="stylesheet" href="/game/game.css" />
     <div class="game-shell" data-game-root>
-        <div class="status-row">
-            <div class="timer" id="timer">60.0</div>
+        <div class="top-bar">
+            <div class="timer" id="timer">60</div>
+            <div class="mission-text">
+                <p>הצליחו להציב את המטוסים כפי שלמדתם.</p>
+                <p>כוונו את המצערת למהירות שלהם והמשיכו לעקוב.</p>
+                <p>הישארו בתוך הכוונת לצבירת ניקוד מירבי.</p>
+            </div>
         </div>
         <div class="hud">
-            <div class="gauge speed-gauge">
-                <div class="gauge-title">מד המהירות</div>
-                <div class="gauge-scale" id="speed-gauge">
-                    {Array.from({ length: 12 }).map((_, index) => (
-                        <span class={`segment segment-${index + 1}`}></span>
+            <div class="side-gauge speed-gauge">
+                <div class="gauge-track">
+                    {Array.from({ length: 16 }).map((_, index) => (
+                        <span class={`tick tick-${index + 1}`}></span>
                     ))}
+                    <span class="indicator" id="speed-indicator"></span>
                 </div>
-                <div class="gauge-value">
-                    <span id="speed-value">0.0</span>
-                    <span class="units">פקודה</span>
-                </div>
+                <div class="gauge-label">מד המהירות</div>
             </div>
             <div class="playfield">
                 <div class="world" id="world">
                     <svg id="target" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M60 10 L95 95 H25 Z" fill="none" stroke="#f7f6c5" stroke-width="4" />
-                        <line x1="60" y1="20" x2="60" y2="90" stroke="#f7f6c5" stroke-width="4" />
+                        <path
+                            d="M60 10 L95 95 H25 Z"
+                            fill="none"
+                            stroke="#ffffff"
+                            stroke-width="5"
+                            stroke-linejoin="round"
+                        />
+                        <line x1="60" y1="20" x2="60" y2="95" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
                     </svg>
                 </div>
                 <div class="crosshair" aria-hidden="true">
-                    <div class="ring ring-1"></div>
-                    <div class="ring ring-2"></div>
-                    <div class="ring ring-3"></div>
-                    <div class="ring ring-4"></div>
+                    <div class="ring ring-outer"></div>
+                    <div class="ring ring-middle"></div>
+                    <div class="ring ring-inner"></div>
+                    <div class="ring ring-core"></div>
                     <div class="axis axis-x"></div>
                     <div class="axis axis-y"></div>
                     <div class="center-dot"></div>
                 </div>
-                <div class="range readout">
-                    <div class="label">מרחק</div>
-                    <div class="value"><span id="range-value">1500</span> מ׳</div>
-                </div>
             </div>
-            <div class="gauge distance-gauge">
-                <div class="gauge-title">קרבת מטרה</div>
-                <div class="gauge-scale" id="distance-gauge">
-                    {Array.from({ length: 12 }).map((_, index) => (
-                        <span class={`segment segment-${index + 1}`}></span>
+            <div class="side-gauge range-gauge">
+                <div class="gauge-track" id="distance-gauge">
+                    {Array.from({ length: 16 }).map((_, index) => (
+                        <span class={`tick tick-${index + 1}`}></span>
                     ))}
+                    <span class="indicator" id="distance-indicator"></span>
                 </div>
-                <div class="gauge-value">
-                    <span id="throttle">50%</span>
-                    <span class="units">מצערת</span>
-                </div>
+                <div class="gauge-label">מד מרחק</div>
             </div>
         </div>
-        <div class="score" id="score">0</div>
-        <div class="instructions">
-            <p>השתמשו בחצים או במקשים A/D להזזת המטרה. חץ מטה מרים את המטרה (היפוך טיסה). W/S שולטים במצערת.</p>
+        <div class="bottom-bar">
+            <div class="stat-block throttle">
+                <div class="stat-value" id="throttle">5.00</div>
+                <div class="stat-label">מצערת</div>
+            </div>
+            <div class="stat-block score">
+                <div class="stat-value" id="score">000</div>
+                <div class="stat-label">ניקוד</div>
+            </div>
+            <div class="stat-block range">
+                <div class="stat-value"><span id="range-value">1500</span> מ׳</div>
+                <div class="stat-label">מרחק</div>
+            </div>
+        </div>
+        <div class="controls-hint">
+            <p>הזיזו עם החצים (Y בהיפוך טיסה), האיצו עם W והאטו עם S.</p>
         </div>
     </div>
     <script type="module" src="/game/game.js"></script>

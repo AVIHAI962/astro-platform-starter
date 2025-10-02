@@ -21,17 +21,29 @@ const init = () => {
     const timerEl = document.getElementById('timer');
     const scoreEl = document.getElementById('score');
     const rangeEl = document.getElementById('range-value');
-    const speedGaugeEl = document.getElementById('speed-gauge');
+    const speedGaugeEl = document.querySelector('.speed-gauge .gauge-track');
     const distanceGaugeEl = document.getElementById('distance-gauge');
-    const speedValueEl = document.getElementById('speed-value');
     const throttleEl = document.getElementById('throttle');
+    const speedIndicatorEl = document.getElementById('speed-indicator');
+    const distanceIndicatorEl = document.getElementById('distance-indicator');
 
-    if (!world || !target || !timerEl || !scoreEl || !rangeEl || !speedGaugeEl || !distanceGaugeEl || !speedValueEl || !throttleEl) {
+    if (
+        !world ||
+        !target ||
+        !timerEl ||
+        !scoreEl ||
+        !rangeEl ||
+        !speedGaugeEl ||
+        !distanceGaugeEl ||
+        !throttleEl ||
+        !speedIndicatorEl ||
+        !distanceIndicatorEl
+    ) {
         return;
     }
 
-    const speedSegments = Array.from(speedGaugeEl.querySelectorAll('.segment'));
-    const distanceSegments = Array.from(distanceGaugeEl.querySelectorAll('.segment'));
+    const speedSegments = Array.from(speedGaugeEl.querySelectorAll('.tick'));
+    const distanceSegments = Array.from(distanceGaugeEl.querySelectorAll('.tick'));
 
     const pressed = new Set();
 
@@ -47,22 +59,43 @@ const init = () => {
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
+    const updateIndicatorPosition = (indicator, track, ratio) => {
+        const clampedRatio = clamp(ratio, 0, 1);
+        const vertical = track.offsetHeight >= track.offsetWidth;
+        if (vertical) {
+            const position = (1 - clampedRatio) * 100;
+            indicator.style.top = `${position}%`;
+            indicator.style.left = '50%';
+        } else {
+            indicator.style.left = `${clampedRatio * 100}%`;
+            indicator.style.top = '50%';
+        }
+    };
+
+    const setTickActivity = (ticks, ratio, track, fill = 'low') => {
+        const clampedRatio = clamp(ratio, 0, 1);
+        const activeCount = Math.round(clampedRatio * ticks.length);
+        const vertical = track.offsetHeight >= track.offsetWidth;
+        const fillFromStart = fill === 'low' ? !vertical : vertical;
+        ticks.forEach((tick, index) => {
+            const shouldActivate = fillFromStart
+                ? index < activeCount
+                : index >= ticks.length - activeCount;
+            tick.classList.toggle('active', shouldActivate);
+        });
+    };
+
     const updateGauges = () => {
         const speedRatio = displayedSpeed / MAX_SPEED;
-        const activeSpeedSegments = Math.round(speedRatio * speedSegments.length);
-        speedSegments.forEach((segment, index) => {
-            segment.classList.toggle('active', index < activeSpeedSegments);
-        });
-        speedValueEl.textContent = displayedSpeed.toFixed(1);
+        setTickActivity(speedSegments, speedRatio, speedGaugeEl, 'low');
+        updateIndicatorPosition(speedIndicatorEl, speedGaugeEl, speedRatio);
 
-        const throttlePercent = Math.round((desiredSpeed / MAX_SPEED) * 100);
-        throttleEl.textContent = `${throttlePercent}%`;
+        const throttleValue = (desiredSpeed / MAX_SPEED) * 10;
+        throttleEl.textContent = throttleValue.toFixed(2);
 
         const proximityRatio = 1 - Math.min(Math.max((distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0), 1);
-        const activeDistanceSegments = Math.round(proximityRatio * distanceSegments.length);
-        distanceSegments.forEach((segment, index) => {
-            segment.classList.toggle('active', index < activeDistanceSegments);
-        });
+        setTickActivity(distanceSegments, proximityRatio, distanceGaugeEl, 'low');
+        updateIndicatorPosition(distanceIndicatorEl, distanceGaugeEl, proximityRatio);
     };
 
     const getInputVector = () => {
@@ -126,16 +159,16 @@ const init = () => {
         distance = clamp(distance, MIN_DISTANCE, MAX_DISTANCE);
         updateTargetScale();
 
-        rangeEl.textContent = Math.round(distance).toString();
+        rangeEl.textContent = Math.round(distance).toLocaleString('he-IL');
 
         const radialDistance = Math.hypot(positionX, positionY);
         if (radialDistance <= CROSSHAIR_RADIUS) {
             score += delta * 150;
         }
-        scoreEl.textContent = Math.round(score).toString();
+        scoreEl.textContent = Math.round(score).toString().padStart(3, '0');
 
         remaining = Math.max(remaining - delta, 0);
-        timerEl.textContent = remaining.toFixed(1).padStart(4, '0');
+        timerEl.textContent = Math.max(0, Math.round(remaining)).toString().padStart(2, '0');
 
         updateGauges();
 
