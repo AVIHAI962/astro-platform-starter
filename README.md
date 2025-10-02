@@ -49,3 +49,12 @@ netlify dev
 ```
 
 If your browser doesn't navigate to the site automatically, visit [localhost:8888](http://localhost:8888).
+
+## Playing the Flight Pursuit Trainer
+
+If you'd like to jump directly into the cockpit experience there are two options:
+
+1. **Instant play (no build required):** open [`public/game/index.html`](public/game/index.html) in your browser. All assets are self-contained, so double-clicking the file after cloning the repo will load the HUD, controls, and timer immediately.
+2. **Within the full site:** run `npm install` followed by `npm run dev`, then browse to [http://localhost:4321/game](http://localhost:4321/game) for the integrated version that sits inside the starter layout and navigation.
+
+Both variants share the exact same visuals and mechanics, including inverted pitch, throttle smoothing, distance-based scaling, scoring, and the 60-second countdown.

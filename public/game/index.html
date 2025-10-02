@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="he">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Flight Pursuit Trainer</title>
+        <link rel="stylesheet" href="./game.css" />
+    </head>
+    <body>
+        <div class="game-shell" data-game-root>
+            <div class="status-row">
+                <div class="timer" id="timer">60.0</div>
+            </div>
+            <div class="hud">
+                <div class="gauge speed-gauge">
+                    <div class="gauge-title">מד המהירות</div>
+                    <div class="gauge-scale" id="speed-gauge">
+                        <span class="segment segment-1"></span>
+                        <span class="segment segment-2"></span>
+                        <span class="segment segment-3"></span>
+                        <span class="segment segment-4"></span>
+                        <span class="segment segment-5"></span>
+                        <span class="segment segment-6"></span>
+                        <span class="segment segment-7"></span>
+                        <span class="segment segment-8"></span>
+                        <span class="segment segment-9"></span>
+                        <span class="segment segment-10"></span>
+                        <span class="segment segment-11"></span>
+                        <span class="segment segment-12"></span>
+                    </div>
+                    <div class="gauge-value">
+                        <span id="speed-value">0.0</span>
+                        <span class="units">פקודה</span>
+                    </div>
+                </div>
+                <div class="playfield">
+                    <div class="world" id="world">
+                        <svg id="target" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M60 10 L95 95 H25 Z" fill="none" stroke="#f7f6c5" stroke-width="4" />
+                            <line x1="60" y1="20" x2="60" y2="90" stroke="#f7f6c5" stroke-width="4" />
+                        </svg>
+                    </div>
+                    <div class="crosshair" aria-hidden="true">
+                        <div class="ring ring-1"></div>
+                        <div class="ring ring-2"></div>
+                        <div class="ring ring-3"></div>
+                        <div class="ring ring-4"></div>
+                        <div class="axis axis-x"></div>
+                        <div class="axis axis-y"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                    <div class="range readout">
+                        <div class="label">מרחק</div>
+                        <div class="value"><span id="range-value">1500</span> מ׳</div>
+                    </div>
+                </div>
+                <div class="gauge distance-gauge">
+                    <div class="gauge-title">קרבת מטרה</div>
+                    <div class="gauge-scale" id="distance-gauge">
+                        <span class="segment segment-1"></span>
+                        <span class="segment segment-2"></span>
+                        <span class="segment segment-3"></span>
+                        <span class="segment segment-4"></span>
+                        <span class="segment segment-5"></span>
+                        <span class="segment segment-6"></span>
+                        <span class="segment segment-7"></span>
+                        <span class="segment segment-8"></span>
+                        <span class="segment segment-9"></span>
+                        <span class="segment segment-10"></span>
+                        <span class="segment segment-11"></span>
+                        <span class="segment segment-12"></span>
+                    </div>
+                    <div class="gauge-value">
+                        <span id="throttle">50%</span>
+                        <span class="units">מצערת</span>
+                    </div>
+                </div>
+            </div>
+            <div class="score" id="score">0</div>
+            <div class="instructions">
+                <p>השתמשו בחצים או במקשים A/D להזזת המטרה. חץ מטה מרים את המטרה (היפוך טיסה). W/S שולטים במצערת.</p>
+            </div>
+        </div>
+        <script type="module" src="./game.js"></script>
+    </body>
+</html>
