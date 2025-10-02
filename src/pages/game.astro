@@ -1,0 +1,483 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Flight Pursuit Trainer">
+    <div class="game-shell">
+        <div class="status-row">
+            <div class="timer" id="timer">60.0</div>
+        </div>
+        <div class="hud">
+            <div class="gauge speed-gauge">
+                <div class="gauge-title">מד המהירות</div>
+                <div class="gauge-scale" id="speed-gauge">
+                    {Array.from({ length: 12 }).map((_, index) => (
+                        <span class={`segment segment-${index + 1}`}></span>
+                    ))}
+                </div>
+                <div class="gauge-value">
+                    <span id="speed-value">0.0</span>
+                    <span class="units">פקודה</span>
+                </div>
+            </div>
+            <div class="playfield">
+                <div class="world" id="world">
+                    <svg id="target" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M60 10 L95 95 H25 Z" fill="none" stroke="#f7f6c5" stroke-width="4" />
+                        <line x1="60" y1="20" x2="60" y2="90" stroke="#f7f6c5" stroke-width="4" />
+                    </svg>
+                </div>
+                <div class="crosshair" aria-hidden="true">
+                    <div class="ring ring-1"></div>
+                    <div class="ring ring-2"></div>
+                    <div class="ring ring-3"></div>
+                    <div class="ring ring-4"></div>
+                    <div class="axis axis-x"></div>
+                    <div class="axis axis-y"></div>
+                    <div class="center-dot"></div>
+                </div>
+                <div class="range readout">
+                    <div class="label">מרחק</div>
+                    <div class="value"><span id="range-value">1500</span> מ׳</div>
+                </div>
+            </div>
+            <div class="gauge distance-gauge">
+                <div class="gauge-title">קרבת מטרה</div>
+                <div class="gauge-scale" id="distance-gauge">
+                    {Array.from({ length: 12 }).map((_, index) => (
+                        <span class={`segment segment-${index + 1}`}></span>
+                    ))}
+                </div>
+                <div class="gauge-value">
+                    <span id="throttle">50%</span>
+                    <span class="units">מצערת</span>
+                </div>
+            </div>
+        </div>
+        <div class="score" id="score">0</div>
+        <div class="instructions">
+            <p>השתמשו בחצים או במקשים A/D להזזת המטרה. חץ מטה מרים את המטרה (היפוך טיסה). W/S שולטים במצערת.</p>
+        </div>
+    </div>
+</Layout>
+
+<style>
+    :global(body) {
+        background: radial-gradient(circle at center, #0b3daa 0%, #072e7c 55%, #041a4e 100%);
+    }
+
+    .game-shell {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        min-height: calc(100vh - 8rem);
+        padding: 2rem 1.5rem 3rem;
+        color: #f7f6c5;
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    .status-row {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .timer {
+        background: rgba(4, 26, 78, 0.75);
+        border: 2px solid rgba(247, 246, 197, 0.4);
+        border-radius: 0.75rem;
+        padding: 0.35rem 1.5rem;
+        font-size: 1.875rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        min-width: 5.5rem;
+        text-align: center;
+        box-shadow: 0 0 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .hud {
+        display: grid;
+        grid-template-columns: 8rem minmax(0, 1fr) 8rem;
+        gap: 1.5rem;
+        width: min(72rem, 100%);
+        flex: 1;
+        align-items: center;
+    }
+
+    .gauge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 1.25rem 0.75rem;
+        background: rgba(4, 26, 78, 0.55);
+        border: 1px solid rgba(247, 246, 197, 0.2);
+        border-radius: 1rem;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.4), 0 0 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .gauge-title {
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        text-align: center;
+    }
+
+    .gauge-scale {
+        display: grid;
+        grid-template-rows: repeat(12, 1fr);
+        gap: 0.3rem;
+        width: 1.25rem;
+    }
+
+    .segment {
+        display: block;
+        width: 100%;
+        border-radius: 0.35rem;
+        height: 0.7rem;
+        background: rgba(247, 246, 197, 0.12);
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.45);
+        transition: background 200ms ease;
+    }
+
+    .segment.active {
+        background: linear-gradient(90deg, #f7f6c5 0%, #f7d15c 100%);
+        box-shadow: 0 0 10px rgba(247, 209, 92, 0.65);
+    }
+
+    .gauge-value {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.95rem;
+        gap: 0.25rem;
+    }
+
+    .gauge-value .units {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    .playfield {
+        position: relative;
+        width: min(40rem, 100%);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, rgba(4, 26, 78, 0.85) 0%, rgba(2, 16, 52, 0.85) 100%);
+        box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .crosshair {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .ring {
+        position: absolute;
+        border-radius: 999px;
+        border: 2px solid rgba(247, 246, 197, 0.35);
+    }
+
+    .ring-1 {
+        width: 85%;
+        height: 85%;
+    }
+
+    .ring-2 {
+        width: 65%;
+        height: 65%;
+    }
+
+    .ring-3 {
+        width: 45%;
+        height: 45%;
+    }
+
+    .ring-4 {
+        width: 25%;
+        height: 25%;
+    }
+
+    .axis {
+        position: absolute;
+        background: rgba(247, 246, 197, 0.25);
+    }
+
+    .axis-x {
+        width: 100%;
+        height: 2px;
+    }
+
+    .axis-y {
+        height: 100%;
+        width: 2px;
+    }
+
+    .center-dot {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 999px;
+        border: 2px solid rgba(247, 246, 197, 0.65);
+        background: rgba(7, 46, 124, 0.6);
+        box-shadow: 0 0 10px rgba(247, 246, 197, 0.65);
+    }
+
+    .world {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: transform 16ms linear;
+    }
+
+    #target {
+        width: 4.5rem;
+        height: 4.5rem;
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.65));
+    }
+
+    .range.readout {
+        position: absolute;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        background: rgba(4, 26, 78, 0.7);
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.75rem;
+        border: 1px solid rgba(247, 246, 197, 0.35);
+        font-size: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.25rem;
+    }
+
+    .range .label {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    .range .value {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .score {
+        margin-top: 1.5rem;
+        padding: 0.5rem 1.75rem;
+        border-radius: 1rem;
+        background: rgba(4, 26, 78, 0.75);
+        border: 1px solid rgba(247, 246, 197, 0.35);
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        box-shadow: 0 0 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .instructions {
+        margin-top: 1rem;
+        font-size: 0.95rem;
+        text-align: center;
+        max-width: 42rem;
+        line-height: 1.5;
+        opacity: 0.8;
+    }
+
+    @media (max-width: 1024px) {
+        .hud {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto auto auto;
+        }
+
+        .gauge {
+            width: 100%;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        .gauge-scale {
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: none;
+            width: 100%;
+            height: 1.25rem;
+        }
+
+        .gauge.distance-gauge .gauge-scale,
+        .gauge.speed-gauge .gauge-scale {
+            justify-items: center;
+        }
+
+        .segment {
+            height: 100%;
+            width: 0.7rem;
+        }
+
+        .playfield {
+            width: min(28rem, 100%);
+        }
+
+        .range.readout {
+            right: 50%;
+            transform: translateX(50%);
+            bottom: 1rem;
+            align-items: center;
+        }
+
+        .instructions {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+<script>
+    const CROSSHAIR_RADIUS = 150;
+    const PX_PER_UNIT = 1.6;
+    const MAX_SPEED = 180;
+    const MIN_SPEED = 0;
+    const SPEED_STEP = 6;
+    const SPEED_SMOOTHING = 0.045;
+    const ENEMY_SPEED = 90;
+    const MAX_DISTANCE = 2000;
+    const MIN_DISTANCE = 120;
+
+    const world = document.getElementById('world');
+    const target = document.getElementById('target');
+    const timerEl = document.getElementById('timer');
+    const scoreEl = document.getElementById('score');
+    const rangeEl = document.getElementById('range-value');
+    const speedGaugeEl = document.getElementById('speed-gauge');
+    const distanceGaugeEl = document.getElementById('distance-gauge');
+    const speedValueEl = document.getElementById('speed-value');
+    const throttleEl = document.getElementById('throttle');
+
+    const speedSegments = Array.from(speedGaugeEl?.querySelectorAll('.segment') ?? []);
+    const distanceSegments = Array.from(distanceGaugeEl?.querySelectorAll('.segment') ?? []);
+
+    const pressed = new Set();
+
+    let desiredSpeed = 90;
+    let displayedSpeed = 90;
+    let positionX = 0;
+    let positionY = 0;
+    let distance = 1500;
+    let score = 0;
+    let remaining = 60;
+    let lastTimestamp = performance.now();
+    let running = true;
+
+    const updateGauges = () => {
+        const speedRatio = displayedSpeed / MAX_SPEED;
+        const activeSpeedSegments = Math.round(speedRatio * speedSegments.length);
+        speedSegments.forEach((segment, index) => {
+            segment.classList.toggle('active', index < activeSpeedSegments);
+        });
+        speedValueEl.textContent = displayedSpeed.toFixed(1);
+
+        const throttlePercent = Math.round((desiredSpeed / MAX_SPEED) * 100);
+        throttleEl.textContent = `${throttlePercent}%`;
+
+        const proximityRatio = 1 - Math.min(Math.max((distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0), 1);
+        const activeDistanceSegments = Math.round(proximityRatio * distanceSegments.length);
+        distanceSegments.forEach((segment, index) => {
+            segment.classList.toggle('active', index < activeDistanceSegments);
+        });
+    };
+
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+    const getInputVector = () => {
+        let horizontal = 0;
+        let vertical = 0;
+
+        if (pressed.has('ArrowLeft') || pressed.has('KeyA')) horizontal -= 1;
+        if (pressed.has('ArrowRight') || pressed.has('KeyD')) horizontal += 1;
+        if (pressed.has('ArrowUp')) vertical += 1;
+        if (pressed.has('ArrowDown')) vertical -= 1;
+
+        const length = Math.hypot(horizontal, vertical);
+        if (!length) return { x: 0, y: 0 };
+        return { x: horizontal / length, y: vertical / length };
+    };
+
+    window.addEventListener('keydown', (event) => {
+        pressed.add(event.code);
+        if (event.code === 'KeyW') {
+            desiredSpeed = clamp(desiredSpeed + SPEED_STEP, MIN_SPEED, MAX_SPEED);
+        }
+        if (event.code === 'KeyS') {
+            desiredSpeed = clamp(desiredSpeed - SPEED_STEP, MIN_SPEED, MAX_SPEED);
+        }
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.code)) {
+            event.preventDefault();
+        }
+    });
+
+    window.addEventListener('keyup', (event) => {
+        pressed.delete(event.code);
+    });
+
+    const updateWorldPosition = () => {
+        world.style.transform = `translate(calc(-50% + ${positionX}px), calc(-50% + ${positionY}px))`;
+    };
+
+    const updateTargetScale = () => {
+        const closeness = 1 - Math.min(Math.max((distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE), 0), 1);
+        const scale = clamp(0.6 + closeness * 1.4, 0.6, 2.1);
+        target.style.transform = `scale(${scale})`;
+    };
+
+    const loop = (timestamp) => {
+        if (!running) return;
+        const delta = (timestamp - lastTimestamp) / 1000;
+        lastTimestamp = timestamp;
+
+        displayedSpeed += (desiredSpeed - displayedSpeed) * SPEED_SMOOTHING;
+
+        const input = getInputVector();
+        positionX += input.x * displayedSpeed * PX_PER_UNIT * delta;
+        positionY += input.y * displayedSpeed * PX_PER_UNIT * delta;
+
+        positionX = clamp(positionX, -320, 320);
+        positionY = clamp(positionY, -320, 320);
+
+        updateWorldPosition();
+
+        distance += (ENEMY_SPEED - displayedSpeed) * delta;
+        distance = clamp(distance, MIN_DISTANCE, MAX_DISTANCE);
+        updateTargetScale();
+
+        rangeEl.textContent = Math.round(distance).toString();
+
+        const radialDistance = Math.hypot(positionX, positionY);
+        if (radialDistance <= CROSSHAIR_RADIUS) {
+            score += delta * 150;
+        }
+        scoreEl.textContent = Math.round(score).toString();
+
+        remaining = Math.max(remaining - delta, 0);
+        timerEl.textContent = remaining.toFixed(1).padStart(4, '0');
+
+        updateGauges();
+
+        if (remaining > 0) {
+            requestAnimationFrame(loop);
+        } else {
+            running = false;
+            timerEl.classList.add('ended');
+        }
+    };
+
+    updateWorldPosition();
+    updateTargetScale();
+    updateGauges();
+    requestAnimationFrame(loop);
+</script>
