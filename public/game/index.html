@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="he">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Flight Pursuit Trainer</title>
+        <link rel="stylesheet" href="./game.css" />
+    </head>
+    <body>
+        <div class="game-shell" data-game-root>
+            <div class="top-bar">
+                <div class="timer" id="timer">60</div>
+                <div class="mission-text">
+                    <p>הצליחו להציב את המטוסים כפי שלמדתם.</p>
+                    <p>כוונו את המצערת למהירות שלהם והמשיכו לעקוב.</p>
+                    <p>הישארו בתוך הכוונת לצבירת ניקוד מירבי.</p>
+                </div>
+            </div>
+            <div class="hud">
+                <div class="side-gauge speed-gauge">
+                    <div class="gauge-track">
+                        <span class="tick tick-1"></span>
+                        <span class="tick tick-2"></span>
+                        <span class="tick tick-3"></span>
+                        <span class="tick tick-4"></span>
+                        <span class="tick tick-5"></span>
+                        <span class="tick tick-6"></span>
+                        <span class="tick tick-7"></span>
+                        <span class="tick tick-8"></span>
+                        <span class="tick tick-9"></span>
+                        <span class="tick tick-10"></span>
+                        <span class="tick tick-11"></span>
+                        <span class="tick tick-12"></span>
+                        <span class="tick tick-13"></span>
+                        <span class="tick tick-14"></span>
+                        <span class="tick tick-15"></span>
+                        <span class="tick tick-16"></span>
+                        <span class="indicator" id="speed-indicator"></span>
+                    </div>
+                    <div class="gauge-label">מד המהירות</div>
+                </div>
+                <div class="playfield">
+                    <div class="world" id="world">
+                        <svg id="target" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M60 10 L95 95 H25 Z"
+                                fill="none"
+                                stroke="#ffffff"
+                                stroke-width="5"
+                                stroke-linejoin="round"
+                            />
+                            <line x1="60" y1="20" x2="60" y2="95" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <div class="crosshair" aria-hidden="true">
+                        <div class="ring ring-outer"></div>
+                        <div class="ring ring-middle"></div>
+                        <div class="ring ring-inner"></div>
+                        <div class="ring ring-core"></div>
+                        <div class="axis axis-x"></div>
+                        <div class="axis axis-y"></div>
+                        <div class="center-dot"></div>
+                    </div>
+                </div>
+                <div class="side-gauge range-gauge">
+                    <div class="gauge-track" id="distance-gauge">
+                        <span class="tick tick-1"></span>
+                        <span class="tick tick-2"></span>
+                        <span class="tick tick-3"></span>
+                        <span class="tick tick-4"></span>
+                        <span class="tick tick-5"></span>
+                        <span class="tick tick-6"></span>
+                        <span class="tick tick-7"></span>
+                        <span class="tick tick-8"></span>
+                        <span class="tick tick-9"></span>
+                        <span class="tick tick-10"></span>
+                        <span class="tick tick-11"></span>
+                        <span class="tick tick-12"></span>
+                        <span class="tick tick-13"></span>
+                        <span class="tick tick-14"></span>
+                        <span class="tick tick-15"></span>
+                        <span class="tick tick-16"></span>
+                        <span class="indicator" id="distance-indicator"></span>
+                    </div>
+                    <div class="gauge-label">מד מרחק</div>
+                </div>
+            </div>
+            <div class="bottom-bar">
+                <div class="stat-block throttle">
+                    <div class="stat-value" id="throttle">5.00</div>
+                    <div class="stat-label">מצערת</div>
+                </div>
+                <div class="stat-block score">
+                    <div class="stat-value" id="score">000</div>
+                    <div class="stat-label">ניקוד</div>
+                </div>
+                <div class="stat-block range">
+                    <div class="stat-value"><span id="range-value">1500</span> מ׳</div>
+                    <div class="stat-label">מרחק</div>
+                </div>
+            </div>
+            <div class="controls-hint">
+                <p>הזיזו עם החצים (Y בהיפוך טיסה), האיצו עם W והאטו עם S.</p>
+            </div>
+        </div>
+        <script type="module" src="./game.js"></script>
+    </body>
+</html>
